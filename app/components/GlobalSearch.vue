@@ -17,13 +17,16 @@
         v-for="(icon, index) in iconButtons"
         :key="index"
         class="icon-button"
-        :class="{ 'selected': hoveredIcon === index }"
+        :class="{ 
+          'selected': searchStore.selectedIcon === index,
+          'hovered': hoveredIcon === index && searchStore.selectedIcon !== index
+        }"
         @mouseenter="hoveredIcon = index"
         @mouseleave="hoveredIcon = -1"
         @click="handleIconClick(icon)"
       >
         <img 
-          :src="hoveredIcon === index ? icon.selected : icon.normal" 
+          :src="(searchStore.selectedIcon === index || hoveredIcon === index) ? icon.selected : icon.normal" 
           :alt="icon.name"
           class="w-10 h-10"
         />
@@ -88,6 +91,14 @@ const iconButtons: IconButton[] = [
   }
 ]
 
+// Keywords that trigger icon selection
+const iconKeywords = {
+  'approvals': ['approval', 'approvals', 'approve', 'approved', 'approving', 'sign off', 'signoff', 'authorize', 'authorization'],
+  'custom': ['custom', 'customize', 'customization', 'personal', 'personalize', 'settings', 'preferences', 'config', 'configuration'],
+  'pending': ['pending', 'waiting', 'queue', 'queued', 'in progress', 'processing', 'awaiting', 'hold', 'on hold'],
+  'pr': ['pr', 'pull request', 'pullrequest', 'merge', 'review', 'code review', 'github', 'git', 'branch', 'commit']
+}
+
 // Handle search when Enter is pressed
 const handleSearch = async (): Promise<void> => {
   if (searchStore.searchQuery.trim()) {
@@ -102,6 +113,37 @@ const handleIconClick = (icon: IconButton): void => {
   searchStore.setSelectedIcon(iconButtons.indexOf(icon))
   console.log('Icon clicked:', icon.name)
 }
+
+// Function to find matching icon based on search query
+const findMatchingIcon = (query: string): number => {
+  const lowerQuery = query.toLowerCase().trim()
+  
+  for (const [iconName, keywords] of Object.entries(iconKeywords)) {
+    const hasMatch = keywords.some(keyword => lowerQuery.includes(keyword))
+    
+    if (hasMatch) {
+      const iconIndex = iconButtons.findIndex(icon => icon.name === iconName)
+      return iconIndex
+    }
+  }
+  
+  return -1 // No match found
+}
+
+// Watch for search query changes and auto-select icon
+watch(() => searchStore.searchQuery, (newQuery) => {
+  if (newQuery && newQuery.trim()) {
+    const matchingIconIndex = findMatchingIcon(newQuery)
+    if (matchingIconIndex !== searchStore.selectedIcon) {
+      searchStore.setSelectedIcon(matchingIconIndex)
+    }
+  } else {
+    // Clear selection when query is empty
+    if (searchStore.selectedIcon !== -1) {
+      searchStore.setSelectedIcon(-1)
+    }
+  }
+}, { immediate: true })
 
 // Open search
 const openSearch = (): void => {
@@ -177,6 +219,13 @@ onMounted(() => {
 }
 
 .icon-button.selected {
+  background: #3B82F6;
+  border-color: #2563EB;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.icon-button.hovered {
   background: #F3F4F6;
   border-color: #D1D5DB;
   transform: translateY(-1px);

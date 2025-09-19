@@ -78,8 +78,8 @@ export const useSearchStore = defineStore('search', () => {
   return {
     // State
     isOpen: readonly(isOpen),
-    searchQuery: readonly(searchQuery),
-    selectedIcon: readonly(selectedIcon),
+    searchQuery,
+    selectedIcon,
     searchResults: readonly(searchResults),
     searchHistory: readonly(searchHistory),
     
