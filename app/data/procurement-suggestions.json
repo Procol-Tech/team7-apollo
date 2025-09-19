@@ -1,0 +1,765 @@
+{
+    "suggestions": [
+        {
+            "id": "pr-001",
+            "title": "PR-2024-001 - Office Equipment Purchase",
+            "description": "Purchase request for laptops and monitors for development team",
+            "type": "pr",
+            "status": "pending",
+            "priority": "medium",
+            "amount": 25000,
+            "currency": "USD",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "equipment",
+                "laptops",
+                "monitors",
+                "development"
+            ],
+            "date": "2024-01-15"
+        },
+        {
+            "id": "pr-002",
+            "title": "PR-2024-002 - Software Licenses",
+            "description": "Annual renewal for Microsoft Office and Adobe Creative Suite",
+            "type": "pr",
+            "status": "approved",
+            "priority": "high",
+            "amount": 15000,
+            "currency": "USD",
+            "department": "IT",
+            "assignee": "Lisa Wang",
+            "tags": [
+                "software",
+                "licenses",
+                "microsoft",
+                "adobe"
+            ],
+            "date": "2024-01-10"
+        },
+        {
+            "id": "po-001",
+            "title": "PO-2024-001 - Cloud Infrastructure",
+            "description": "AWS and Azure services for Q1 2024",
+            "type": "po",
+            "status": "active",
+            "priority": "high",
+            "amount": 75000,
+            "currency": "USD",
+            "department": "IT",
+            "assignee": "Robert Taylor",
+            "tags": [
+                "cloud",
+                "aws",
+                "azure",
+                "infrastructure"
+            ],
+            "date": "2024-01-08"
+        },
+        {
+            "id": "po-002",
+            "title": "PO-2024-002 - Professional Services",
+            "description": "External consulting for digital transformation project",
+            "type": "po",
+            "status": "pending",
+            "priority": "medium",
+            "amount": 120000,
+            "currency": "USD",
+            "department": "Strategy",
+            "assignee": "Maria Garcia",
+            "tags": [
+                "consulting",
+                "professional",
+                "digital",
+                "transformation"
+            ],
+            "date": "2024-01-12"
+        },
+        {
+            "id": "rfx-001",
+            "title": "RFX-2024-001 - Office Renovation",
+            "description": "Request for proposal for office space renovation project",
+            "type": "rfx",
+            "status": "active",
+            "priority": "medium",
+            "amount": 200000,
+            "currency": "USD",
+            "department": "Facilities",
+            "assignee": "David Kim",
+            "tags": [
+                "renovation",
+                "office",
+                "construction",
+                "facilities"
+            ],
+            "date": "2024-01-18"
+        },
+        {
+            "id": "rfx-002",
+            "title": "RFX-2024-002 - Security Services",
+            "description": "Request for proposal for enterprise security services",
+            "type": "rfx",
+            "status": "pending",
+            "priority": "high",
+            "amount": 85000,
+            "currency": "USD",
+            "department": "Security",
+            "assignee": "Kevin Lee",
+            "tags": [
+                "security",
+                "services",
+                "enterprise",
+                "monitoring"
+            ],
+            "date": "2024-01-20"
+        },
+        {
+            "id": "vendor-001",
+            "title": "Microsoft Corporation",
+            "description": "Technology vendor specializing in software and cloud services",
+            "type": "vendor",
+            "status": "active",
+            "priority": "high",
+            "category": "Technology",
+            "department": "Procurement",
+            "assignee": "Sarah Johnson",
+            "tags": [
+                "microsoft",
+                "software",
+                "cloud",
+                "technology"
+            ],
+            "date": "2024-01-05"
+        },
+        {
+            "id": "vendor-002",
+            "title": "Dell Technologies",
+            "description": "Hardware vendor for computers and enterprise equipment",
+            "type": "vendor",
+            "status": "active",
+            "priority": "medium",
+            "category": "Hardware",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "dell",
+                "hardware",
+                "computers",
+                "equipment"
+            ],
+            "date": "2024-01-03"
+        },
+        {
+            "id": "approval-001",
+            "title": "Budget Approval - Q1 2024",
+            "description": "Approval for Q1 procurement budget allocation",
+            "type": "approval",
+            "status": "completed",
+            "priority": "high",
+            "amount": 500000,
+            "currency": "USD",
+            "department": "Finance",
+            "assignee": "Jennifer Brown",
+            "tags": [
+                "budget",
+                "approval",
+                "quarterly",
+                "finance"
+            ],
+            "date": "2024-01-01"
+        },
+        {
+            "id": "approval-002",
+            "title": "Vendor Contract Approval",
+            "description": "Approval for new vendor partnership agreement",
+            "type": "approval",
+            "status": "pending",
+            "priority": "medium",
+            "department": "Legal",
+            "assignee": "Thomas Wilson",
+            "tags": [
+                "vendor",
+                "contract",
+                "partnership",
+                "agreement"
+            ],
+            "date": "2024-01-16"
+        },
+        {
+            "id": "recent-001",
+            "title": "Recent: Office Supplies Order",
+            "description": "Recently completed order for office supplies and stationery",
+            "type": "recent",
+            "status": "completed",
+            "priority": "low",
+            "amount": 2500,
+            "currency": "USD",
+            "department": "Admin",
+            "assignee": "Rachel Green",
+            "tags": [
+                "supplies",
+                "stationery",
+                "office",
+                "recent"
+            ],
+            "date": "2024-01-14"
+        },
+        {
+            "id": "recent-002",
+            "title": "Recent: Marketing Materials",
+            "description": "Recently completed order for Q1 marketing campaign materials",
+            "type": "recent",
+            "status": "completed",
+            "priority": "medium",
+            "amount": 8500,
+            "currency": "USD",
+            "department": "Marketing",
+            "assignee": "Alex Rodriguez",
+            "tags": [
+                "marketing",
+                "materials",
+                "campaign",
+                "recent"
+            ],
+            "date": "2024-01-11"
+        },
+        {
+            "id": "rfx-participants-001",
+            "title": "RFX-2024-001 Participants",
+            "description": "List of participants for office renovation RFX",
+            "type": "rfx-participants",
+            "status": "active",
+            "priority": "medium",
+            "department": "Facilities",
+            "assignee": "David Kim",
+            "tags": [
+                "participants",
+                "rfx",
+                "renovation",
+                "vendors"
+            ],
+            "date": "2024-01-18"
+        },
+        {
+            "id": "technical-stage-001",
+            "title": "Technical Stage - Software Evaluation",
+            "description": "Technical evaluation stage for new software platform",
+            "type": "technical-stage",
+            "status": "active",
+            "priority": "high",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "technical",
+                "evaluation",
+                "software",
+                "stage"
+            ],
+            "date": "2024-01-22"
+        },
+        {
+            "id": "technical-stage-002",
+            "title": "Technical Stage - Infrastructure Review",
+            "description": "Technical review of cloud infrastructure proposals",
+            "type": "technical-stage",
+            "status": "pending",
+            "priority": "high",
+            "department": "IT",
+            "assignee": "Robert Taylor",
+            "tags": [
+                "technical",
+                "infrastructure",
+                "cloud",
+                "review"
+            ],
+            "date": "2024-01-25"
+        },
+        {
+            "id": "rfq-stage-001",
+            "title": "RFQ Stage - Hardware Procurement",
+            "description": "Request for Quotation stage for server hardware",
+            "type": "rfq-stage",
+            "status": "active",
+            "priority": "medium",
+            "amount": 45000,
+            "currency": "USD",
+            "department": "IT",
+            "assignee": "Lisa Wang",
+            "tags": [
+                "rfq",
+                "hardware",
+                "servers",
+                "procurement"
+            ],
+            "date": "2024-01-19"
+        },
+        {
+            "id": "rfq-stage-002",
+            "title": "RFQ Stage - Consulting Services",
+            "description": "Request for Quotation for business consulting services",
+            "type": "rfq-stage",
+            "status": "pending",
+            "priority": "medium",
+            "amount": 75000,
+            "currency": "USD",
+            "department": "Strategy",
+            "assignee": "Maria Garcia",
+            "tags": [
+                "rfq",
+                "consulting",
+                "business",
+                "services"
+            ],
+            "date": "2024-01-21"
+        },
+        {
+            "id": "auction-stage-001",
+            "title": "Auction Stage - Office Furniture",
+            "description": "Reverse auction for office furniture and equipment",
+            "type": "auction-stage",
+            "status": "active",
+            "priority": "low",
+            "amount": 35000,
+            "currency": "USD",
+            "department": "Facilities",
+            "assignee": "David Kim",
+            "tags": [
+                "auction",
+                "furniture",
+                "office",
+                "equipment"
+            ],
+            "date": "2024-01-17"
+        },
+        {
+            "id": "auction-stage-002",
+            "title": "Auction Stage - Marketing Services",
+            "description": "Reverse auction for digital marketing services",
+            "type": "auction-stage",
+            "status": "pending",
+            "priority": "medium",
+            "amount": 60000,
+            "currency": "USD",
+            "department": "Marketing",
+            "assignee": "Alex Rodriguez",
+            "tags": [
+                "auction",
+                "marketing",
+                "digital",
+                "services"
+            ],
+            "date": "2024-01-23"
+        },
+        {
+            "id": "dashboard-001",
+            "title": "Approvals Dashboard",
+            "description": "View all pending and completed approvals",
+            "type": "dashboard",
+            "status": "active",
+            "priority": "high",
+            "department": "Finance",
+            "assignee": "Jennifer Brown",
+            "tags": [
+                "dashboard",
+                "approvals",
+                "pending",
+                "completed"
+            ],
+            "date": "2024-01-01"
+        },
+        {
+            "id": "dashboard-002",
+            "title": "Purchase Orders Dashboard",
+            "description": "View all purchase orders and their status",
+            "type": "dashboard",
+            "status": "active",
+            "priority": "high",
+            "department": "Procurement",
+            "assignee": "Sarah Johnson",
+            "tags": [
+                "dashboard",
+                "purchase",
+                "orders",
+                "status"
+            ],
+            "date": "2024-01-01"
+        },
+        {
+            "id": "activity-001",
+            "title": "Technical Stage Order Activity",
+            "description": "Audit log for technical stage order activities",
+            "type": "activity-log",
+            "status": "active",
+            "priority": "medium",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "activity",
+                "log",
+                "technical",
+                "audit"
+            ],
+            "date": "2024-01-22"
+        },
+        {
+            "id": "activity-002",
+            "title": "RFQ Order Activity",
+            "description": "Audit log for RFQ order activities and changes",
+            "type": "activity-log",
+            "status": "active",
+            "priority": "medium",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "activity",
+                "log",
+                "rfq",
+                "audit"
+            ],
+            "date": "2024-01-19"
+        },
+        {
+            "id": "messages-001",
+            "title": "Technical Stage Messages",
+            "description": "Communication messages for technical stage evaluation",
+            "type": "messages",
+            "status": "active",
+            "priority": "medium",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "messages",
+                "technical",
+                "communication",
+                "evaluation"
+            ],
+            "date": "2024-01-22"
+        },
+        {
+            "id": "messages-002",
+            "title": "RFQ Messages",
+            "description": "Communication messages for RFQ process",
+            "type": "messages",
+            "status": "active",
+            "priority": "medium",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "messages",
+                "rfq",
+                "communication",
+                "process"
+            ],
+            "date": "2024-01-19"
+        },
+        {
+            "id": "reminders-001",
+            "title": "Technical Stage Reminders",
+            "description": "Send reminders for technical stage submissions",
+            "type": "reminders",
+            "status": "pending",
+            "priority": "medium",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "reminders",
+                "technical",
+                "submissions",
+                "notifications"
+            ],
+            "date": "2024-01-24"
+        },
+        {
+            "id": "reminders-002",
+            "title": "RFQ Reminders",
+            "description": "Send reminders for RFQ submissions",
+            "type": "reminders",
+            "status": "pending",
+            "priority": "medium",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "reminders",
+                "rfq",
+                "submissions",
+                "notifications"
+            ],
+            "date": "2024-01-21"
+        },
+        {
+            "id": "surrogate-001",
+            "title": "Technical Surrogate Bid",
+            "description": "Add surrogate bid for technical stage evaluation",
+            "type": "surrogate-bid",
+            "status": "pending",
+            "priority": "low",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "surrogate",
+                "bid",
+                "technical",
+                "evaluation"
+            ],
+            "date": "2024-01-25"
+        },
+        {
+            "id": "surrogate-002",
+            "title": "RFQ Surrogate Bid",
+            "description": "Add surrogate bid for RFQ process",
+            "type": "surrogate-bid",
+            "status": "pending",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "surrogate",
+                "bid",
+                "rfq",
+                "process"
+            ],
+            "date": "2024-01-22"
+        },
+        {
+            "id": "counter-offer-001",
+            "title": "Bulk Counter Offer - Software Licenses",
+            "description": "Send bulk counter offers for software license negotiations",
+            "type": "counter-offer",
+            "status": "pending",
+            "priority": "medium",
+            "amount": 12000,
+            "currency": "USD",
+            "department": "IT",
+            "assignee": "Lisa Wang",
+            "tags": [
+                "counter",
+                "offer",
+                "software",
+                "licenses"
+            ],
+            "date": "2024-01-20"
+        },
+        {
+            "id": "currencies-001",
+            "title": "Bidding Currencies - RFQ",
+            "description": "Show available bidding currencies for RFQ process",
+            "type": "currencies",
+            "status": "active",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "currencies",
+                "bidding",
+                "rfq",
+                "exchange"
+            ],
+            "date": "2024-01-19"
+        },
+        {
+            "id": "currencies-002",
+            "title": "Bidding Currencies - Auction",
+            "description": "Show available bidding currencies for auction process",
+            "type": "currencies",
+            "status": "active",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Sarah Johnson",
+            "tags": [
+                "currencies",
+                "bidding",
+                "auction",
+                "exchange"
+            ],
+            "date": "2024-01-17"
+        },
+        {
+            "id": "rejected-bids-001",
+            "title": "Rejected Bids - RFQ",
+            "description": "View rejected bids for RFQ process",
+            "type": "rejected-bids",
+            "status": "active",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "rejected",
+                "bids",
+                "rfq",
+                "review"
+            ],
+            "date": "2024-01-19"
+        },
+        {
+            "id": "rejected-bids-002",
+            "title": "Rejected Bids - Auction",
+            "description": "View rejected bids for auction process",
+            "type": "rejected-bids",
+            "status": "active",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Sarah Johnson",
+            "tags": [
+                "rejected",
+                "bids",
+                "auction",
+                "review"
+            ],
+            "date": "2024-01-17"
+        },
+        {
+            "id": "best-offers-001",
+            "title": "Request Best Offers - Software",
+            "description": "Request best offers from software vendors",
+            "type": "best-offers",
+            "status": "pending",
+            "priority": "medium",
+            "department": "IT",
+            "assignee": "Lisa Wang",
+            "tags": [
+                "best",
+                "offers",
+                "software",
+                "vendors"
+            ],
+            "date": "2024-01-21"
+        },
+        {
+            "id": "extend-time-001",
+            "title": "Extend Technical Stage Submission",
+            "description": "Extend submission time for technical stage evaluation",
+            "type": "extend-time",
+            "status": "pending",
+            "priority": "medium",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "extend",
+                "time",
+                "technical",
+                "submission"
+            ],
+            "date": "2024-01-24"
+        },
+        {
+            "id": "extend-time-002",
+            "title": "Extend RFQ Submission Time",
+            "description": "Extend submission time for RFQ process",
+            "type": "extend-time",
+            "status": "pending",
+            "priority": "medium",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "extend",
+                "time",
+                "rfq",
+                "submission"
+            ],
+            "date": "2024-01-21"
+        },
+        {
+            "id": "edit-time-001",
+            "title": "Edit Technical Stage Evaluation Time",
+            "description": "Modify evaluation time for technical stage",
+            "type": "edit-time",
+            "status": "pending",
+            "priority": "low",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "edit",
+                "time",
+                "technical",
+                "evaluation"
+            ],
+            "date": "2024-01-25"
+        },
+        {
+            "id": "edit-time-002",
+            "title": "Edit RFQ Evaluation Time",
+            "description": "Modify evaluation time for RFQ process",
+            "type": "edit-time",
+            "status": "pending",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "edit",
+                "time",
+                "rfq",
+                "evaluation"
+            ],
+            "date": "2024-01-22"
+        },
+        {
+            "id": "withdraw-001",
+            "title": "Withdraw Technical Stage",
+            "description": "Withdraw technical stage from evaluation process",
+            "type": "withdraw",
+            "status": "pending",
+            "priority": "high",
+            "department": "IT",
+            "assignee": "John Smith",
+            "tags": [
+                "withdraw",
+                "technical",
+                "stage",
+                "evaluation"
+            ],
+            "date": "2024-01-26"
+        },
+        {
+            "id": "withdraw-002",
+            "title": "Withdraw RFQ / Recreate Order",
+            "description": "Withdraw RFQ and recreate order",
+            "type": "withdraw",
+            "status": "pending",
+            "priority": "high",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "withdraw",
+                "rfq",
+                "recreate",
+                "order"
+            ],
+            "date": "2024-01-23"
+        },
+        {
+            "id": "convert-001",
+            "title": "Convert RFQ to Auction",
+            "description": "Convert RFQ process to reverse auction",
+            "type": "convert",
+            "status": "pending",
+            "priority": "medium",
+            "department": "Procurement",
+            "assignee": "Mike Chen",
+            "tags": [
+                "convert",
+                "rfq",
+                "auction",
+                "process"
+            ],
+            "date": "2024-01-22"
+        },
+        {
+            "id": "cost-breakdown-001",
+            "title": "Extend Cost Breakdown Time",
+            "description": "Extend time for cost breakdown submissions",
+            "type": "cost-breakdown",
+            "status": "pending",
+            "priority": "low",
+            "department": "Procurement",
+            "assignee": "Sarah Johnson",
+            "tags": [
+                "cost",
+                "breakdown",
+                "extend",
+                "time"
+            ],
+            "date": "2024-01-20"
+        }
+    ]
+}

@@ -2,17 +2,17 @@
   <!-- Backdrop -->
   <div 
     v-if="searchStore.isOpen" 
-    class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
-    @click="searchStore.closeSearch"
+    class="backdrop"
+    @click="handleBackdropClick"
   />
   
   <!-- Floating Search Bar -->
   <div 
     v-if="searchStore.isOpen"
-    class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl mx-4"
+    class="search-container"
   >
     <!-- Icon Buttons -->
-    <div class="flex gap-2 mb-4 justify-start">
+    <div class="icon-buttons-container" @click.stop>
       <button
         v-for="(icon, index) in iconButtons"
         :key="index"
@@ -28,15 +28,15 @@
         <img 
           :src="(searchStore.selectedIcon === index || hoveredIcon === index) ? icon.selected : icon.normal" 
           :alt="icon.name"
-          class="w-10 h-10"
+          class="icon-image"
         />
       </button>
     </div>
 
     <!-- Search Bar -->
-    <div class="bg-white rounded-xl shadow-2xl border border-gray-200">
-      <div class="flex items-center gap-4 px-6 py-4">
-        <UIcon name="i-heroicons-magnifying-glass" class="w-5 h-5 text-gray-400 flex-shrink-0" />
+    <div class="search-bar" @click.stop>
+      <div class="search-input-container">
+        <UIcon name="i-heroicons-magnifying-glass" class="search-icon" />
         <input
           ref="searchInput"
           v-model="searchStore.searchQuery"
@@ -46,9 +46,20 @@
           @keydown.enter="handleSearch"
           autofocus
         />
-        <div class="text-xs text-gray-400 flex-shrink-0">
+        <div class="keyboard-hint">
           Ctrl or ⌘ + K
         </div>
+      </div>
+      
+      <!-- Autocomplete Dropdown -->
+      <div v-if="showAutocomplete" class="autocomplete-container">
+        <AutocompleteDropdown
+          :suggested-actions="suggestedActions"
+          :related-documents="relatedDocuments"
+          @action-click.prevent="handleActionClick"
+          @document-click.prevent="handleDocumentClick"
+          @duration-change.prevent="handleDurationChange"
+        />
       </div>
     </div>
   </div>
@@ -56,6 +67,8 @@
 
 <script setup lang="ts">
 import { useSearchStore } from '~/store/search.store'
+import AutocompleteDropdown from './AutocompleteDropdown.vue'
+import { getAutocompleteData, type SuggestedAction, type RelatedDocument } from '~/data/autocomplete-data'
 
 interface IconButton {
   name: string
@@ -66,6 +79,11 @@ interface IconButton {
 const searchStore = useSearchStore()
 const searchInput = ref<HTMLInputElement | null>(null)
 const hoveredIcon = ref<number>(-1)
+
+// Autocomplete data
+const suggestedActions = ref<SuggestedAction[]>([])
+const relatedDocuments = ref<RelatedDocument[]>([])
+const showAutocomplete = ref(false)
 
 // Icon buttons configuration
 const iconButtons: IconButton[] = [
@@ -108,6 +126,32 @@ const handleSearch = async (): Promise<void> => {
   }
 }
 
+// Handle autocomplete action click
+const handleActionClick = (action: SuggestedAction): void => {
+  console.log('GlobalSearch - Action clicked:', action)
+  // All actions are now expandable, so don't close search
+  console.log('Not closing search - action is expandable')
+}
+
+// Handle autocomplete document click
+const handleDocumentClick = (document: RelatedDocument): void => {
+  console.log('Document clicked:', document)
+  // You can add logic here to open the document
+  searchStore.closeSearch()
+}
+
+// Handle duration change
+const handleDurationChange = (actionId: string, duration: string): void => {
+  console.log('Duration changed:', actionId, duration)
+  // You can add logic here to handle duration changes
+}
+
+// Handle backdrop click
+const handleBackdropClick = (): void => {
+  console.log('Backdrop clicked - closing search')
+  searchStore.closeSearch()
+}
+
 // Handle icon button click
 const handleIconClick = (icon: IconButton): void => {
   searchStore.setSelectedIcon(iconButtons.indexOf(icon))
@@ -137,11 +181,20 @@ watch(() => searchStore.searchQuery, (newQuery) => {
     if (matchingIconIndex !== searchStore.selectedIcon) {
       searchStore.setSelectedIcon(matchingIconIndex)
     }
+    
+    // Show autocomplete dropdown with sample data
+    const autocompleteData = getAutocompleteData(newQuery)
+    suggestedActions.value = autocompleteData.suggestedActions
+    relatedDocuments.value = autocompleteData.relatedDocuments
+    showAutocomplete.value = true
   } else {
     // Clear selection when query is empty
     if (searchStore.selectedIcon !== -1) {
       searchStore.setSelectedIcon(-1)
     }
+    showAutocomplete.value = false
+    suggestedActions.value = []
+    relatedDocuments.value = []
   }
 }, { immediate: true })
 
@@ -180,6 +233,56 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+}
+
+.search-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 16px;
+}
+
+.icon-buttons-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  justify-content: flex-start;
+}
+
+.search-bar {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e5e7eb;
+}
+
+.search-input-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
 .search-input {
   flex: 1;
   border: none;
@@ -197,6 +300,12 @@ onMounted(() => {
 
 .search-input:focus {
   outline: none;
+}
+
+.keyboard-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  flex-shrink: 0;
 }
 
 .icon-button {
@@ -232,7 +341,14 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.icon-button img {
+.icon-image {
+  width: 40px;
+  height: 40px;
   transition: opacity 0.2s ease;
+}
+
+.autocomplete-container {
+  border-top: 1px solid #f3f4f6;
+  padding: 16px;
 }
 </style>
