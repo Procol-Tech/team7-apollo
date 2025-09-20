@@ -59,6 +59,8 @@
           @action-click.prevent="handleActionClick"
           @document-click.prevent="handleDocumentClick"
           @duration-change.prevent="handleDurationChange"
+          @open-event.prevent="handleOpenEvent"
+          @done.prevent="handleDone"
         />
       </div>
     </div>
@@ -149,6 +151,22 @@ const handleDurationChange = (actionId: string, duration: string): void => {
 // Handle backdrop click
 const handleBackdropClick = (): void => {
   console.log('Backdrop clicked - closing search')
+  searchStore.closeSearch()
+}
+
+// Handle open event
+const handleOpenEvent = (actionId: string, duration: string): void => {
+  console.log('Open Event clicked:', actionId, duration)
+  // You can add logic here to open the event
+  // For now, just close the search
+  searchStore.closeSearch()
+}
+
+// Handle done
+const handleDone = (actionId: string, duration: string): void => {
+  console.log('Done clicked:', actionId, duration)
+  // You can add logic here to process the action
+  // Close the search after done
   searchStore.closeSearch()
 }
 

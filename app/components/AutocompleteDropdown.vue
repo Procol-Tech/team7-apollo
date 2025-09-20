@@ -5,6 +5,8 @@
       :actions="suggestedActions"
       @action-click="handleActionClick"
       @duration-change="handleDurationChange"
+      @open-event="handleOpenEvent"
+      @done="handleDone"
     />
     
     <!-- Separator -->
@@ -47,6 +49,8 @@ const emit = defineEmits<{
   actionClick: [action: SuggestedAction]
   documentClick: [document: RelatedDocument]
   durationChange: [actionId: string, duration: string]
+  openEvent: [actionId: string, duration: string]
+  done: [actionId: string, duration: string]
 }>()
 
 const handleActionClick = (action: SuggestedAction): void => {
@@ -59,6 +63,14 @@ const handleDocumentClick = (document: RelatedDocument): void => {
 
 const handleDurationChange = (actionId: string, duration: string): void => {
   emit('durationChange', actionId, duration)
+}
+
+const handleOpenEvent = (actionId: string, duration: string): void => {
+  emit('openEvent', actionId, duration)
+}
+
+const handleDone = (actionId: string, duration: string): void => {
+  emit('done', actionId, duration)
 }
 </script>
 

@@ -14,29 +14,51 @@
         <div
           class="action-item"
           :class="{ 
-            'has-chevron': true,
-            'expanded': expandedActionIndex === index
+            'has-chevron': !completedActions.has(getUniqueActionId(action, index)),
+            'expanded': expandedActionIndex === index && !completedActions.has(getUniqueActionId(action, index)),
+            'completed': completedActions.has(getUniqueActionId(action, index))
           }"
-          @click.stop="handleActionClick(action, index)"
+          @click.stop="!completedActions.has(getUniqueActionId(action, index)) ? handleActionClick(action, index) : null"
         >
           <div class="action-content">
-            <span class="action-id">{{ action.id }}</span>
-            <span class="action-bullet">•</span>
-            <span class="action-description">{{ action.description }}</span>
+            <div class="action-main">
+              <span class="action-id">{{ action.id }}</span>
+              <span class="action-bullet">•</span>
+              <span class="action-description">
+                {{ completedActions.has(getUniqueActionId(action, index)) ? 'Extended time in RFP' : action.description }}
+              </span>
+            </div>
+            <div v-if="completedActions.has(getUniqueActionId(action, index))" class="action-duration">| 30 mins</div>
           </div>
-          <div class="action-chevron">
+          
+          <!-- Show chevron for normal actions -->
+          <div v-if="!completedActions.has(getUniqueActionId(action, index))" class="action-chevron">
             <UIcon name="i-heroicons-chevron-right" class="w-3 h-3" />
+          </div>
+          
+          <!-- Show dismiss button for completed actions -->
+          <div v-if="completedActions.has(getUniqueActionId(action, index))" class="action-dismiss">
+            <button class="dismiss-button" @click.stop="handleDismissAction(getUniqueActionId(action, index))">
+              <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+            </button>
+          </div>
+          
+          <!-- Completed details - show below the main line for completed actions -->
+          <div v-if="completedActions.has(getUniqueActionId(action, index))" class="completed-details">
+            <span class="action-link">{{ action.actionLink || '10083-WELDING EQUIPMENT & ACCESSORIES | Raunak Arora' }}</span>
           </div>
         </div>
         
-        <!-- Expanded Action -->
+        <!-- Expanded Action - Only for non-completed actions -->
         <ExpandedAction
-          v-if="expandedActionIndex === index"
-          :action-id="action.id"
+          v-if="expandedActionIndex === index && !completedActions.has(getUniqueActionId(action, index))"
+          :action-id="getUniqueActionId(action, index)"
           :action-link="action.actionLink || '10083-WELDING EQUIPMENT & ACCESSORIES | Raunak Arora'"
           :duration-options="durationOptions"
           @close="handleCloseExpanded"
           @duration-change="handleDurationChange"
+          @open-event="handleOpenEvent"
+          @done="handleDone"
         />
       </template>
     </div>
@@ -67,9 +89,17 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   actionClick: [action: SuggestedAction]
   durationChange: [actionId: string, duration: string]
+  openEvent: [actionId: string, duration: string]
+  done: [actionId: string, duration: string]
 }>()
 
 const expandedActionIndex = ref<number | null>(null)
+const completedActions = ref<Set<string>>(new Set())
+
+// Helper function to create unique action IDs
+const getUniqueActionId = (action: SuggestedAction, index: number): string => {
+  return `${action.id}-${index}-${action.action || action.description.replace(/\s+/g, '-').toLowerCase()}`
+}
 
 const durationOptions: DurationOption[] = [
   { value: '15min', label: '15 minutes' },
@@ -98,7 +128,28 @@ const handleCloseExpanded = (): void => {
 
 const handleDurationChange = (duration: string): void => {
   const action = props.actions[expandedActionIndex.value!]
-  emit('durationChange', action.id, duration)
+  const uniqueId = getUniqueActionId(action, expandedActionIndex.value!)
+  emit('durationChange', uniqueId, duration)
+}
+
+const handleOpenEvent = (actionId: string, duration: string): void => {
+  console.log('Open Event clicked:', actionId, duration)
+  emit('openEvent', actionId, duration)
+}
+
+const handleDone = (actionId: string, duration: string): void => {
+  console.log('Done clicked:', actionId, duration)
+  // Mark this specific action as completed
+  completedActions.value.add(actionId)
+  // Close the expanded action after done
+  expandedActionIndex.value = null
+  emit('done', actionId, duration)
+}
+
+const handleDismissAction = (actionId: string): void => {
+  console.log('Dismissing action:', actionId)
+  // Remove from completed actions to return to normal state
+  completedActions.value.delete(actionId)
 }
 </script>
 
@@ -182,5 +233,70 @@ const handleDurationChange = (duration: string): void => {
 .action-chevron {
   flex-shrink: 0;
   margin-left: 8px;
+}
+
+/* Completed Action Styles */
+.action-item.completed {
+  background-color: #f3f4f6;
+  border-left: 3px solid #10b981;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.action-item.completed .action-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.action-main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.action-duration {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 400;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.action-dismiss {
+  display: flex;
+  align-items: center;
+}
+
+.dismiss-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.15s ease;
+}
+
+.dismiss-button:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.completed-details {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.completed-details .action-link {
+  color: #6b7280;
+  font-size: 13px;
+  font-style: italic;
 }
 </style>
