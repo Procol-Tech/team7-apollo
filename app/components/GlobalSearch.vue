@@ -10,9 +10,13 @@
   <div 
     v-if="searchStore.isOpen"
     class="search-container"
+    :class="{ 
+      'search-container--expanded': showAutocomplete && !isFullscreen,
+      'search-container--fullscreen': isFullscreen
+    }"
   >
     <!-- Icon Buttons -->
-    <div class="icon-buttons-container" @click.stop>
+    <div v-if="!isFullscreen" class="icon-buttons-container" @click.stop>
       <button
         v-for="(icon, index) in iconButtons"
         :key="index"
@@ -42,7 +46,7 @@
           v-model="searchStore.searchQuery"
           class="search-input"
           placeholder="Search for anything.."
-          @keydown.escape="searchStore.closeSearch"
+          @keydown.escape="handleEscape"
           @keydown.enter="handleSearch"
           autofocus
         />
@@ -52,16 +56,45 @@
       </div>
       
       <!-- Autocomplete Dropdown -->
-      <div v-if="showAutocomplete" class="autocomplete-container">
-        <AutocompleteDropdown
-          :suggested-actions="suggestedActions"
-          :related-documents="relatedDocuments"
-          @action-click.prevent="handleActionClick"
-          @document-click.prevent="handleDocumentClick"
-          @duration-change.prevent="handleDurationChange"
-          @open-event.prevent="handleOpenEvent"
-          @done.prevent="handleDone"
-        />
+      <div v-if="showAutocomplete" class="autocomplete-container" :class="{ 'autocomplete-container--fullscreen': isFullscreen }">
+        <!-- Loading State -->
+        <div v-if="searchStore.searchAPIState.status === 'loading'" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">{{ searchStore.searchAPIState.message }}</p>
+        </div>
+        
+        <!-- Success State -->
+        <div v-else-if="searchStore.searchAPIState.status === 'success'">
+          <div v-if="searchStore.purchaseRequests.length > 0 || searchStore.purchaseOrders.length > 0 || searchStore.approvals.length > 0 || searchStore.events.length > 0">
+            <AutocompleteDropdown
+              :purchase-requests="searchStore.purchaseRequests"
+              :purchase-orders="searchStore.purchaseOrders"
+              :approvals="searchStore.approvals"
+              :events="searchStore.events"
+              :intent="currentIntent"
+              @purchase-request-click.prevent="handlePurchaseRequestClick"
+              @purchase-order-click.prevent="handlePurchaseOrderClick"
+              @approval-click.prevent="handleApprovalClick"
+              @event-click.prevent="handleEventClick"
+              @show-all.prevent="handleShowAll"
+            />
+          </div>
+          <div v-else class="no-results-state">
+            <p class="no-results-text">{{ searchStore.searchAPIState.message }}</p>
+          </div>
+        </div>
+        
+        <!-- Failed State -->
+        <div v-else-if="searchStore.searchAPIState.status === 'failed'" class="error-state">
+          <div class="error-icon">⚠️</div>
+          <p class="error-text">{{ searchStore.searchAPIState.message }}</p>
+          <button class="retry-button" @click="retrySearch">Try Again</button>
+        </div>
+        
+        <!-- Idle State -->
+        <div v-else-if="searchStore.searchAPIState.status === 'idle'" class="idle-state">
+          <p class="idle-text">Start typing to perform an action...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -70,7 +103,26 @@
 <script setup lang="ts">
 import { useSearchStore } from '~/store/search.store'
 import AutocompleteDropdown from './AutocompleteDropdown.vue'
-import { getAutocompleteData, type SuggestedAction, type RelatedDocument } from '~/data/autocomplete-data'
+
+interface PurchaseRequest {
+  readonly uuid: string
+  readonly data: {
+    readonly prNo: string
+    readonly purchGrp: string
+    readonly prTypeDesc: string
+    readonly additional_pr_data: readonly {
+      readonly data: {
+        readonly value: string | number
+        readonly option_key?: string
+        readonly prefix?: string
+      }
+      readonly key_attribute: string
+    }[]
+  }
+  readonly created_at: string
+  readonly status: string
+  readonly rfq_no: string
+}
 
 interface IconButton {
   name: string
@@ -82,10 +134,22 @@ const searchStore = useSearchStore()
 const searchInput = ref<HTMLInputElement | null>(null)
 const hoveredIcon = ref<number>(-1)
 
-// Autocomplete data
-const suggestedActions = ref<SuggestedAction[]>([])
-const relatedDocuments = ref<RelatedDocument[]>([])
+// Show autocomplete state
 const showAutocomplete = ref(false)
+
+// Fullscreen mode state
+const isFullscreen = ref(false)
+
+// Get intent from API response
+const currentIntent = computed(() => {
+  if (searchStore.apiResponse?.results?.[0]?.intent_classification?.intent) {
+    return searchStore.apiResponse.results[0].intent_classification.intent
+  }
+  return 'purchase_request' // default fallback
+})
+
+// Debounce timer ref
+let debounceTimer: NodeJS.Timeout | null = null
 
 // Icon buttons configuration
 const iconButtons: IconButton[] = [
@@ -119,55 +183,114 @@ const iconKeywords = {
   'pr': ['pr', 'pull request', 'pullrequest', 'merge', 'review', 'code review', 'github', 'git', 'branch', 'commit']
 }
 
+// Debounced search function
+const debouncedSearch = (query: string): void => {
+  // Clear existing timer
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+  
+  // Set new timer
+  debounceTimer = setTimeout(async () => {
+    if (query && query.trim()) {
+      const iconType = searchStore.selectedIcon >= 0 ? iconButtons[searchStore?.selectedIcon ?? 0]?.name : undefined
+      console.log('Triggering debounced API call for:', query)
+      await searchStore.performSearch(query, iconType)
+    }
+  }, 200) // 400ms debounce
+}
+
 // Handle search when Enter is pressed
 const handleSearch = async (): Promise<void> => {
+  isFullscreen.value = true
+
   if (searchStore.searchQuery.trim()) {
+    // Clear any pending debounced search to prevent duplicate calls
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
+    
     const iconType = searchStore.selectedIcon >= 0 ? iconButtons[searchStore?.selectedIcon ?? 0]?.name : undefined
     await searchStore.performSearch(searchStore.searchQuery, iconType)
-    searchStore.closeSearch()
+    
+    // Enter fullscreen mode if we have results
+    if (searchStore.purchaseRequests.length > 0 || searchStore.purchaseOrders.length > 0 || searchStore.approvals.length > 0 || searchStore.events.length > 0) {
+      showAutocomplete.value = true
+      // Ensure input maintains focus in fullscreen mode
+      nextTick(() => {
+        searchInput.value?.focus()
+      })
+    } else {
+      searchStore.closeSearch()
+    }
   }
 }
 
-// Handle autocomplete action click
-const handleActionClick = (action: SuggestedAction): void => {
-  console.log('GlobalSearch - Action clicked:', action)
-  // All actions are now expandable, so don't close search
-  console.log('Not closing search - action is expandable')
-}
-
-// Handle autocomplete document click
-const handleDocumentClick = (document: RelatedDocument): void => {
-  console.log('Document clicked:', document)
-  // You can add logic here to open the document
+// Handle purchase request click
+const handlePurchaseRequestClick = (purchaseRequest: PurchaseRequest): void => {
+  console.log('Purchase Request clicked:', purchaseRequest)
+  // You can add logic here to open the purchase request
   searchStore.closeSearch()
 }
 
-// Handle duration change
-const handleDurationChange = (actionId: string, duration: string): void => {
-  console.log('Duration changed:', actionId, duration)
-  // You can add logic here to handle duration changes
+// Handle purchase order click
+const handlePurchaseOrderClick = (purchaseOrder: any): void => {
+  console.log('Purchase Order clicked:', purchaseOrder)
+  // You can add logic here to open the purchase order
+  searchStore.closeSearch()
+}
+
+// Handle approval click
+const handleApprovalClick = (approval: any): void => {
+  console.log('Approval clicked:', approval)
+  // You can add logic here to open the approval
+  searchStore.closeSearch()
+}
+
+// Handle event click
+const handleEventClick = (event: any): void => {
+  console.log('Event clicked:', event)
+  // You can add logic here to open the event
+  searchStore.closeSearch()
 }
 
 // Handle backdrop click
 const handleBackdropClick = (): void => {
   console.log('Backdrop clicked - closing search')
-  searchStore.closeSearch()
+  if (isFullscreen.value) {
+    isFullscreen.value = false
+    showAutocomplete.value = false
+  } else {
+    searchStore.closeSearch()
+  }
 }
 
-// Handle open event
-const handleOpenEvent = (actionId: string, duration: string): void => {
-  console.log('Open Event clicked:', actionId, duration)
-  // You can add logic here to open the event
-  // For now, just close the search
-  searchStore.closeSearch()
+// Handle escape key to exit fullscreen
+const handleEscape = (): void => {
+  console.log('Escape key pressed, isFullscreen:', isFullscreen.value)
+  if (isFullscreen.value) {
+    isFullscreen.value = false
+    showAutocomplete.value = false
+    console.log('Exited fullscreen mode')
+  } else {
+    searchStore.closeSearch()
+    console.log('Closed search')
+  }
 }
 
-// Handle done
-const handleDone = (actionId: string, duration: string): void => {
-  console.log('Done clicked:', actionId, duration)
-  // You can add logic here to process the action
-  // Close the search after done
-  searchStore.closeSearch()
+// Handle retry search
+const retrySearch = (): void => {
+  if (searchStore.searchQuery.trim()) {
+    const iconType = searchStore.selectedIcon >= 0 ? iconButtons[searchStore?.selectedIcon ?? 0]?.name : undefined
+    searchStore.performSearch(searchStore.searchQuery, iconType)
+  }
+}
+
+// Handle show all button click
+const handleShowAll = (): void => {
+  console.log('Show All clicked - functionality to be implemented later')
+  // TODO: Implement show all functionality
 }
 
 // Handle icon button click
@@ -200,10 +323,10 @@ watch(() => searchStore.searchQuery, (newQuery) => {
       searchStore.setSelectedIcon(matchingIconIndex)
     }
     
-    // Show autocomplete dropdown with sample data
-    const autocompleteData = getAutocompleteData(newQuery)
-    suggestedActions.value = autocompleteData.suggestedActions
-    relatedDocuments.value = autocompleteData.relatedDocuments
+    // Trigger debounced API call
+    debouncedSearch(newQuery)
+    
+    // Show autocomplete dropdown
     showAutocomplete.value = true
   } else {
     // Clear selection when query is empty
@@ -211,8 +334,12 @@ watch(() => searchStore.searchQuery, (newQuery) => {
       searchStore.setSelectedIcon(-1)
     }
     showAutocomplete.value = false
-    suggestedActions.value = []
-    relatedDocuments.value = []
+    
+    // Clear any pending debounced search
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
   }
 }, { immediate: true })
 
@@ -246,11 +373,82 @@ onMounted(() => {
   
   onUnmounted(() => {
     document.removeEventListener('keydown', handleKeydown)
+    // Cleanup debounce timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
   })
 })
 </script>
 
 <style scoped>
+
+@keyframes fadeIn {
+  from {
+    scale: 0.8;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    scale: 1;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    top: 10%;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    top: 10%;
+    transform: translate(-50%, 0);
+  }
+  to {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes expandToFullscreen {
+  from {
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 100%;
+    max-width: 42rem;
+    margin: 0 16px;
+  }
+  to {
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    height: 100vh;
+  }
+}
+
+@keyframes slideToTop {
+  from {
+    top: 10%;
+    transform: translate(-50%, 0);
+  }
+  to {
+    top: 0;
+    transform: translate(-50%, 0);
+  }
+}
 .backdrop {
   position: fixed;
   top: 0;
@@ -271,6 +469,29 @@ onMounted(() => {
   width: 100%;
   max-width: 42rem;
   margin: 0 16px;
+  animation: fadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  animation-fill-mode: forwards;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.search-container--expanded {
+  top: 10%;
+  transform: translate(-50%, 0);
+  animation: slideUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  animation-fill-mode: forwards;
+}
+
+.search-container--fullscreen {
+  top: 0;
+  left: 0;
+  transform: none;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  animation: expandToFullscreen 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  animation-fill-mode: forwards;
 }
 
 .icon-buttons-container {
@@ -280,11 +501,24 @@ onMounted(() => {
   justify-content: flex-start;
 }
 
+
 .search-bar {
   background: white;
   border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   border: 1px solid #e5e7eb;
+}
+
+.search-container--fullscreen .search-bar {
+  border-radius: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+.search-container--fullscreen .search-input-container {
+  padding: 20px 24px;
 }
 
 .search-input-container {
@@ -368,5 +602,113 @@ onMounted(() => {
 .autocomplete-container {
   border-top: 1px solid #f3f4f6;
   padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.autocomplete-container--fullscreen {
+  height: calc(100vh - 80px);
+  max-height: none;
+  padding: 24px;
+  background: white;
+  border-top: 1px solid #f3f4f6;
+  overflow-y: auto;
+}
+
+/* N States Architecture - State Components */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.no-results-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.no-results-text {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.retry-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.retry-button:hover {
+  background: #2563eb;
+}
+
+.idle-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.idle-text {
+  color: #9ca3af;
+  font-size: 14px;
+  margin: 0;
 }
 </style>
