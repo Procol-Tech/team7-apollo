@@ -19,6 +19,8 @@ interface ApiSearchResponse {
         success: boolean
         data: {
           purchase_requests?: PurchaseRequest[]
+          // Some responses return groups; event intent may return event_groups
+          event_groups?: any[]
           groups?: Array<{
             data: {
               responses: Array<{
@@ -252,6 +254,32 @@ export const useSearchStore = defineStore('search', () => {
   const recentSearches = computed(() => searchHistory.value.slice(0, 5))
 
   // Actions
+  const STORAGE_KEY = 'search_history_v1'
+
+  const loadHistory = () => {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) {
+        // Only allow strings
+        searchHistory.value = parsed.filter((x) => typeof x === 'string')
+      }
+    } catch (e) {
+      // ignore corrupted storage
+    }
+  }
+
+  const saveHistory = () => {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(searchHistory.value))
+    } catch (e) {
+      // storage may be full or blocked; ignore
+    }
+  }
+
   const openSearch = () => {
     isOpen.value = true
   }
@@ -277,11 +305,13 @@ export const useSearchStore = defineStore('search', () => {
       if (searchHistory.value.length > 10) {
         searchHistory.value = searchHistory.value.slice(0, 10)
       }
+      saveHistory()
     }
   }
 
   const clearHistory = () => {
     searchHistory.value = []
+    saveHistory()
   }
 
   // Extract purchase requests from API response
@@ -592,9 +622,6 @@ export const useSearchStore = defineStore('search', () => {
 
   const performSearch = async (query: string, iconType?: string) => {
     try {
-      // Add to history
-      addToHistory(query)
-      
       // Set loading state using N States architecture
       useStateModifier(searchAPIState.value, 'loading', 'Thinking...')
       
@@ -689,6 +716,9 @@ export const useSearchStore = defineStore('search', () => {
       return []
     }
   }
+
+  // Load history on store initialization (client only)
+  loadHistory()
 
   return {
     // State

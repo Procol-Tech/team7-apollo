@@ -81,6 +81,20 @@
           </div>
           <div v-else class="no-results-state">
             <p class="no-results-text">{{ searchStore.searchAPIState.message }}</p>
+            <div v-if="searchStore.recentSearches.length > 0" class="recent-section">
+              <div class="recent-header">Recent searches</div>
+              <div class="recent-list">
+                <button
+                  v-for="(item, idx) in searchStore.recentSearches"
+                  :key="idx"
+                  class="recent-item"
+                  @click="handleRecentClick(item)"
+                >
+                  <UIcon name="i-heroicons-clock" class="recent-icon" />
+                  <span class="recent-text">{{ item }}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -94,6 +108,20 @@
         <!-- Idle State -->
         <div v-else-if="searchStore.searchAPIState.status === 'idle'" class="idle-state">
           <p class="idle-text">Start typing to perform an action...</p>
+          <div v-if="searchStore.recentSearches.length > 0" class="recent-section">
+            <div class="recent-header">Recent searches</div>
+            <div class="recent-list">
+              <button
+                v-for="(item, idx) in searchStore.recentSearches"
+                :key="idx"
+                class="recent-item"
+                @click="handleRecentClick(item)"
+              >
+                <UIcon name="i-heroicons-clock" class="recent-icon" />
+                <span class="recent-text">{{ item }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -211,6 +239,8 @@ const handleSearch = async (): Promise<void> => {
       debounceTimer = null
     }
     
+    // Add to recent searches only on explicit Enter
+    searchStore.addToHistory(searchStore.searchQuery)
     const iconType = searchStore.selectedIcon >= 0 ? iconButtons[searchStore?.selectedIcon ?? 0]?.name : undefined
     await searchStore.performSearch(searchStore.searchQuery, iconType)
     
@@ -229,8 +259,12 @@ const handleSearch = async (): Promise<void> => {
 
 // Handle purchase request click
 const handlePurchaseRequestClick = (purchaseRequest: PurchaseRequest): void => {
-  console.log('Purchase Request clicked:', purchaseRequest)
-  // You can add logic here to open the purchase request
+  const baseUrl = 'https://cpanel.ag-ri.in/purchase-requisitions/'
+  const uuid = purchaseRequest?.uuid
+  if (uuid) {
+    const url = `${baseUrl}${uuid}`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
   searchStore.closeSearch()
 }
 
@@ -250,8 +284,12 @@ const handleApprovalClick = (approval: any): void => {
 
 // Handle event click
 const handleEventClick = (event: any): void => {
-  console.log('Event clicked:', event)
-  // You can add logic here to open the event
+  const baseUrl = 'https://cpanel.ag-ri.in/project/'
+  const uuid = event?.uuid
+  if (uuid) {
+    const url = `${baseUrl}${uuid}/details`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
   searchStore.closeSearch()
 }
 
@@ -297,6 +335,24 @@ const handleShowAll = (): void => {
 const handleIconClick = (icon: IconButton): void => {
   searchStore.setSelectedIcon(iconButtons.indexOf(icon))
   console.log('Icon clicked:', icon.name)
+}
+
+// Handle recent search click
+const handleRecentClick = async (query: string): Promise<void> => {
+  if (!query || !query.trim()) return
+  searchStore.setSearchQuery(query)
+  isFullscreen.value = true
+  // Cancel any pending debounce to avoid double calls
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
+  }
+  const iconType = searchStore.selectedIcon >= 0 ? iconButtons[searchStore?.selectedIcon ?? 0]?.name : undefined
+  await searchStore.performSearch(query, iconType)
+  showAutocomplete.value = true
+  nextTick(() => {
+    searchInput.value?.focus()
+  })
 }
 
 // Function to find matching icon based on search query
@@ -710,5 +766,54 @@ onMounted(() => {
   color: #9ca3af;
   font-size: 14px;
   margin: 0;
+}
+
+/* Recent searches styles */
+.recent-section {
+  margin-top: 16px;
+}
+
+.recent-header {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.recent-item:hover {
+  background: #f3f4f6;
+}
+
+.recent-icon {
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+}
+
+.recent-text {
+  color: #374151;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
