@@ -72,11 +72,11 @@
               :approvals="searchStore.approvals"
               :events="searchStore.events"
               :intent="currentIntent"
-              @purchase-request-click.prevent="handlePurchaseRequestClick"
-              @purchase-order-click.prevent="handlePurchaseOrderClick"
-              @approval-click.prevent="handleApprovalClick"
-              @event-click.prevent="handleEventClick"
-              @show-all.prevent="handleShowAll"
+              @purchase-request-click="handlePurchaseRequestClick"
+              @purchase-order-click="handlePurchaseOrderClick"
+              @approval-click="handleApprovalClick"
+              @event-click="handleEventClick"
+              @show-all="handleShowAll"
             />
           </div>
           <div v-else class="no-results-state">
